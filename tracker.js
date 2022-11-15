@@ -103,14 +103,20 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
     // console.log("displayBills: ", bills);
     // console.log(billTemplate(bills[0]));
-    let showBills = bills.slice(0, showThisMany);
-    showBills = showBills.map((bill) => billTemplate(bill));
-    // console.log(allBills.join(""));
-    let moreButtonHTML =
-      showBills.length < allBillsArray.length
-        ? "<div id='more'><button>Show More</button></div>"
-        : "";
-    billsElement.innerHTML = showBills.join("") + moreButtonHTML;
+    if (anyFiltersChecked()) {
+      showBills = bills.map((bill) => billTemplate(bill));
+      billsElement.innerHTML = showBills.join("");
+    } else {
+      // only limit display quantity and show more button when all filters off
+      let showBills = bills.slice(0, showThisMany);
+      showBills = showBills.map((bill) => billTemplate(bill));
+      // console.log(allBills.join(""));
+      let moreButtonHTML =
+        showBills.length < allBillsArray.length
+          ? "<div id='more'><button>Show More</button></div>"
+          : "";
+      billsElement.innerHTML = showBills.join("") + moreButtonHTML;
+    }
     addShowHideClickEvents();
     initMoreButton();
   };
@@ -294,6 +300,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
         });
       })
     );
+  };
+
+  const anyFiltersChecked = () => {
+    getCheckedFilters().length;
   };
 
   const getCheckedFilters = () => {
