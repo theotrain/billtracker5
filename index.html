@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="reset.css" />
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.21/jquery.csv.min.js"
+    integrity="sha512-Y8iWYJDo6HiTo5xtml1g4QqHtl/PO1w+dmUpQfQSOTqKNsMhExfyPN2ncNAe9JuJUSKzwK/b6oaNPop4MXzkwg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  <script src="getSheetData.js" type="text/javascript" defer></script>
+  <script src="tracker.js" type="text/javascript" defer></script>
+  <!-- <script src="node_modules/g-sheets-api/build/gsheetsapi.js" type="module" defer></script> -->
+  <!-- <script src="sheets-reader.js" type="module" defer></script> -->
+  <title>Bill Tracker</title>
+</head>
+
+<body>
+  <main>
+    <div id="intro">
+      <h1>Federal Soil Health<br />Bill Tracker</h1>
+      <p>Highlighting bills introduced into U.S. Congress that could have a significant impact on soil health and
+        resilience.</p>
+      <button>JOIN BILL TRACKER ALERTS LIST →</button>
+    </div>
+
+    <div id="tabs">
+      <button id="openBillTracker" class="active">Bill Tracker</button>
+      <button id="openLegislators">Legislators</button>
+    </div>
+
+    <div id="tracker" class="tab-section">
+      <div id="filters">
+        <!-- <div class="filter-section">
+          <div class="filter-section-title">CONGRESS</div>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Bernie Sanders</span>
+          </label>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Someone Else</span>
+          </label>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-title">PARTY</div>
+
+
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Someone Else</span>
+          </label> -->
+
+        <!-- <div id="add-filters">
+
+          </div> -->
+      </div>
+
+      <div id="bills" class="tab-section-inner">
+        <!-- bills inserted here by js -->
+      </div>
+
+    </div>
+
+    <div id="legislators" class="tab-section">
+      <div id="filters">
+        <div class="filter-section">
+          <div class="filter-section-title">PARTY</div>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Democrat</span>
+          </label>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Republican</span>
+          </label>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Independent</span>
+          </label>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-title">BODY</div>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>Senate</span>
+          </label>
+
+          <label class="filter-check">
+            <input type="checkbox" name="checkbox" />
+            <span>House</span>
+          </label>
+        </div>
+
+      </div>
+      <div id="legislators-inner" class="tab-section-inner">
+        Let’s begin to answer that question by reading the Constitution. Look at Article 1, Sections 2 and
+        3. Notice that members of the House are elected every two years, whereas senators are elected for
+        six-year terms. Do they share the same age and citizenship requirements? House members must
+        be twenty-five years of age and citizens for seven years. Senators are at least thirty years old and
+        citizens for nine years. Another difference is who they represent. Senators represent their entire
+        states, but members of the House represent individual districts. The number of districts in each state
+        is determined by a state’s population. Each state has a minimum of one representative in Congress.
+        The House and Senate have evolved into very different bodies. They have entirely separate rules
+        and ways of conducting business.
+        Today, Congress consists of 100 senators (two from each state) and 435 voting members of the
+        House of Representatives. The terms of office and number of members directly affects each
+        institution. With four times the membership, the House follows procedures closely and limits
+        debate. Debate is nearly unlimited in the Senate and all members have an opportunity to
+        influence legislation. Senators feel less pressure to move quickly on issues.
+        Party leaders and committees function differently in the House and Senate as well. The House
+        elects a Speaker (Article 1, Section 2) who exerts great control. The Speaker is in charge of
+        the calendar (what bills are debated and when that occurs) and influences the House Rules
+        Committee in deciding the legislation to be considered. The Senate does not have a position
+        similar to Speaker. In the Senate, the majority and minority leaders generally work together in
+        consultation with all members to determine the schedule.
+      </div>
+    </div>
+  </main>
+</body>
+
+
+
+
+
+</html>
+
+
+
+<!-- <div class="bill">
+          <div class="bill-header">
+            <a href="http://www.google.com" target="_blank" class="bill-number">H.R. 8706</a>
+            <div class="title">Agricultural Management Assistance Modernization Act of 2022</div>
+
+            <div class="bill-label">Lead Sponsor</div>
+            <div class="sponsor">Rep. Tim Ryan (D-OH-13)</div>
+            <div class="cosponsor-quantity">/ 8 Cosponsors</div>
+          </div>
+          <div class="bill-summary">
+            <div class="bill-label">Summary</div>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+              mollit anim id est laborum.
+            </p>
+          </div>
+          <button type="button" class="bill-showhide">
+            <span class="showhide-text">SHOW DETAILS</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10.958" height="6.893" viewBox="0 0 10.958 6.893">
+              <path id="Path_29" data-name="Path 29" d="M321.357,2054.082l4.772,4.772,4.772-4.772"
+                transform="translate(-320.65 -2053.375)" fill="none" stroke="#fff" stroke-width="2"></path>
+            </svg>
+          </button>
+        </div> -->
