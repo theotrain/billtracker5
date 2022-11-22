@@ -111,7 +111,7 @@ main {
   /* padding: 25px 45px 25px  */
   /* background-color: var(--land-light-grey); */
   align-self: start; 
-  background-image: url(/icons/herringbone2.svg);
+  background-image: url(./icons/herringbone2.svg);
   background-repeat: repeat-y;
   background-position: left;
   background-size: 7px;
