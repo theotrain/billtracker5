@@ -224,7 +224,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       if (bill[filter.prop]) {
         elements.push(`
         <div class="icon-plus-text">
-          <img src="/icons/${filter.file}" class="icon" />
+          <img src="./icons/${filter.file}" class="icon" />
           <div class="text">
             ${filter.text}${
           filter.text == "Introduced" || filter.text == "Last Action"
