@@ -54,6 +54,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const number = bill["Number"];
     const sponsor = bill["Sponsor"];
     const summary = stringToHTML(bill["Summary"]);
+    const support = stringToHTML(bill["Support"]);
     const analysis = stringToList(bill["Analysis"]);
     const democrat = bill["Democrat"];
     const republican = bill["Republican"];
@@ -63,35 +64,179 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const practical = bill["Practical Infrastructure"];
     const omnibus = bill["Omnibus Bill"];
     const newIncentive = bill["New Incentive"];
+    const progress1 = bill["Approved By Committee"];
+    const progress2 = bill["Passed House"];
+    const progress3 = bill["Passed Senate"];
+    const progress4 = bill["To President"];
+    const progress5 = bill["Passed"];
 
     return `<div class="bill">
-        <div class="bill-header">
-          <a href="${link}" target="_blank" class="bill-number">${number}</a>
-          <div class="title">${name}</div>
+        <div class="bill-main">
+          <div class="bill-header">
+            <a href="${link}" target="_blank" class="bill-number">${number}</a>
+            <div class="title">${name}</div>
 
-          <div class="bill-label">Lead Sponsor</div>
-          <div class="sponsor">${sponsor}</div>
-          <div class="cosponsor-quantity">/ ${quantity} Cosponsors</div>
+            <div class="bill-label">Lead Sponsor</div>
+            <div class="sponsor">${sponsor}</div>
+            <div class="cosponsor-quantity">/ ${quantity} Cosponsors</div>
+            <div class="bill-progress">
+              <ul>
+                <li class="active">Introduced</li>
+                <li ${
+                  progress1 ? 'class="active"' : ""
+                }>Approved By Committee</li>
+                <li ${progress2 ? 'class="active"' : ""}>Passed House</li>
+                <li ${progress3 ? 'class="active"' : ""}>Passed Senate</li>
+                <li ${progress4 ? 'class="active"' : ""}>To President</li>
+                <li ${progress5 ? 'class="active"' : ""}>Became Law</li>
+              </ul>
+            </div>
+          </div>
+          <div class="bill-summary">
+            <div class="bill-label">Summary</div>
+            <p>
+            ${linksToHTML(summary)}
+            </p>
+            ${supportIfExists(support)}
+            <div class="bill-section-spacer"></div>
+            <div class="bill-label">Analysis</div>
+            <p>
+            ${analysis}
+            </p>
+          </div>
         </div>
-        <div class="bill-summary">
-          <div class="bill-label">Summary</div>
-          <p>
-          ${summary}
-          </p>
-          <div class="bill-section-spacer"></div>
-          <div class="bill-label">Analysis</div>
-          <p>
-          ${analysis}
-          </p>
+        <div class="bill-sidebar">
+            ${aboveTheFoldFiltersTemplate(bill)}
+            ${listFilters(bill)}
         </div>
         <button type="button" class="bill-showhide">
           <span class="showhide-text">SHOW DETAILS</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="10.958" height="6.893" viewBox="0 0 10.958 6.893">
             <path id="Path_29" data-name="Path 29" d="M321.357,2054.082l4.772,4.772,4.772-4.772"
-              transform="translate(-320.65 -2053.375)" fill="none" stroke="#fff" stroke-width="2"></path>
+              transform="translate(-320.65 -2053.375)" fill="none" stroke-width="2"></path>
           </svg>
         </button>
     </div>`;
+  };
+
+  const listFilters = (bill) => {
+    const belowTheFoldTags = [
+      "Soil Health",
+      "Livestock/Grazing",
+      "Local/Regional Food Systems",
+      "Ag Infrastructure",
+      "Forestry",
+      "Wildfire",
+      "Row Crops",
+      "Finance",
+      "Taxes",
+      "Incentives",
+      "Regional Infrastructure",
+      "Research",
+      "Crop Insurance",
+      "Marker Bill",
+      "Regulation",
+      "Removing Barriers",
+      "Omnibus Package",
+      "Resolution",
+      "Core",
+      "Secondary",
+    ];
+    let tagsHTML = belowTheFoldTags
+      .map((tag) => {
+        let tagValue = bill[tag];
+        if (tagValue) return `<li>${tag}</li>`;
+        return "";
+      })
+      .join("");
+    if (tagsHTML === "") return "";
+    return `
+      <div class="tag-section">
+        <div class="tag-list-header">TAGS</div>
+        <ul class="tag-list">
+          ${tagsHTML}
+        </ul>
+      </div>
+      `;
+  };
+
+  const supportIfExists = (support) => {
+    if (!support) return "";
+    return `
+      <div class="bill-section-spacer"></div>
+      <div class="bill-label">Support</div>
+      <p>
+      ${linksToHTML(support)}
+      </p>
+    `;
+  };
+
+  const linksToHTML = (text) => {
+    const sections = text.split("]]");
+    if (sections.length === 1) return text;
+    console.log("sections: ", sections);
+    console.log("------============++++++++++++==========-------------");
+    let revisedSections = sections.map((section) => {
+      if (section == "") return "";
+      console.log("section", section);
+      let split = section.split("[[");
+      if (split.length === 1) return section;
+      console.log("split", split);
+      let linkOnly = split.slice(-1)[0].trim();
+      console.log("linkOnly", linkOnly);
+      let linkOnlySplit = linkOnly.split(" ");
+      if (linkOnlySplit.length === 1) return split.join("");
+      let url = linkOnlySplit.slice(-1)[0];
+      let html = `<a href="${url}">${linkOnlySplit.slice(0, -1).join(" ")}</a>`;
+      console.log(
+        "mapping return pre-replacement: ",
+        split.slice(0, -1).join("")
+      );
+      return split.slice(0, -1).join("") + html;
+    });
+    console.log("------============++++++++++++==========-------------");
+    console.log("revised sections: ", revisedSections);
+    return revisedSections.join("");
+  };
+
+  const aboveTheFoldFiltersTemplate = (bill) => {
+    const mainFilterData = [
+      { text: "116th Congress", prop: "116th", file: "congress.jpg" },
+      { text: "117th Congress", prop: "117th", file: "congress.jpg" },
+      { text: "118th Congress", prop: "118th", file: "congress.jpg" },
+      { text: "Democrat", prop: "Democrat", file: "democrat.jpg" },
+      { text: "Republican", prop: "Republican", file: "republican.jpg" },
+      { text: "Independent", prop: "Independent", file: "independent.jpg" },
+      { text: "Bipartisan", prop: "Bipartisan", file: "bipartisan.jpg" },
+      { text: "Introduced", prop: "Introduced", file: "calendar.jpg" },
+      { text: "Last Action", prop: "Last Action", file: "calendar-last.jpg" },
+      { text: "Core Soil Health Bill", prop: "Core", file: "core.jpg" },
+      {
+        text: "Secondary Soil Health Bill",
+        prop: "Secondary",
+        file: "secondary.jpg",
+      },
+    ];
+
+    let elements = [];
+
+    mainFilterData.forEach((filter) => {
+      if (bill[filter.prop]) {
+        elements.push(`
+        <div class="icon-plus-text">
+          <img src="/icons/${filter.file}" class="icon" />
+          <div class="text">
+            ${filter.text}${
+          filter.text == "Introduced" || filter.text == "Last Action"
+            ? " " + bill[filter.prop].toLocaleDateString("en-US")
+            : ""
+        }
+          </div>
+        </div>`);
+      }
+    });
+
+    return elements.join("");
   };
 
   const displayBills = (bills = allBillsArray) => {
@@ -166,7 +311,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
       billShowHideButtons[i].addEventListener("click", function () {
         let textElement = this.querySelector(".showhide-text");
         this.classList.toggle("active");
-        var content = $(this.previousElementSibling);
+        //get "bill-summary" element
+        var content = $(this.parentNode.querySelector(".bill-summary"));
+        var sidebarTags = $(this.parentNode.querySelector(".tag-section"));
+        // var content = $(
+        //   this.previousElementSibling.previousElementSibling.children[1]
+        // );
         // if (content.style.display === "block") {
         if (this.classList.contains("active")) {
           // content.style.marginTop = "16px";
@@ -174,12 +324,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
           // content.style.display = "block";
           // content.style.maxHeight = "100vh";
           content.slideDown(250);
+          sidebarTags.show();
         } else {
           // content.style.marginTop = "0px";
           textElement.innerHTML = "SHOW DETAILS";
           // content.style.display = "none";
           // content.style.maxHeight = "0px";
           content.slideUp(250);
+          sidebarTags.hide();
         }
       });
     }
