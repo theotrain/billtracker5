@@ -5,6 +5,8 @@
   --land-light-grey: #f3f3f3;
   --land-dark-grey: #717171;
   --form-element-disabled: #959495;
+  --land-red: #f64446;
+  --land-purple: #776DBF;
   /* --progress: #d3485b; */
   /* --progress-light: #f4e9ea; */
   --progress: #ffb90f;
@@ -111,10 +113,11 @@ main {
   /* padding: 25px 45px 25px  */
   /* background-color: var(--land-light-grey); */
   align-self: start; 
-  background-image: url(./icons/herringbone2.svg);
-  background-repeat: repeat-y;
-  background-position: left;
-  background-size: 7px;
+  /* background-image: url(./icons/herringbone2.svg); */
+  border-left: 2px dashed #ebebeb;
+  /* background-repeat: repeat-y; */
+  /* background-position: left; */
+  /* background-size: 7px; */
   display: flex;
   flex-direction: column;
 }
@@ -247,6 +250,7 @@ main {
   bottom: -2px;
   left: 45px;
   font-weight: bold;
+  /* border: 2px solid black; */
   border: 2px solid black;
   padding: 4px 18px 2px 18px;
   background-color: none;
@@ -254,7 +258,7 @@ main {
   color: white; */
   background-color: #000;
   color: white;
-  border-radius: 8px 8px 0 0;
+  border-radius: 12px 12px 0 0;
   cursor: pointer;
   /* border-bottom: none; */
 }
@@ -549,6 +553,27 @@ main {
   /* color: #312a16; */
   /* color: #fff; */
   /* color: var(--progress-light); */
+}
+
+.cosponsors {
+  margin-top: 32px;
+  font-size: .85em;
+}
+.cosponsors-d-title, .cosponsors-r-title, .cosponsors-i-title {
+  font-weight: bold;
+  font-size: 1.1em;
+  font-style: italic;
+  display: inline-block;
+  margin-right: 8px;
+}
+.cosponsors-d-title {
+  color: var(--land-blue)
+}
+.cosponsors-r-title {
+  color: var(--land-red)
+}
+.cosponsors-i-title {
+  color: var(--land-dark-grey)
 }
 
 @container (max-width: 750px) {

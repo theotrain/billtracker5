@@ -69,6 +69,9 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const progress3 = bill["Passed Senate"];
     const progress4 = bill["To President"];
     const progress5 = bill["Passed"];
+    const cosponsorsD = bill["Cosponsors (D)"].trim();
+    const cosponsorsR = bill["Cosponsors (R)"].trim();
+    const cosponsorsI = bill["Cosponsors (I)"].trim();
 
     return `<div class="bill">
         <div class="bill-main">
@@ -103,6 +106,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
             <p>
             ${analysis}
             </p>
+            ${cosponsorsTemplate(cosponsorsD, cosponsorsR, cosponsorsI)}
+
           </div>
         </div>
         <div class="bill-sidebar">
@@ -117,6 +122,57 @@ window.addEventListener("DOMContentLoaded", (event) => {
           </svg>
         </button>
     </div>`;
+  };
+
+  const cosponsorsTemplate = (cosponsorsD, cosponsorsR, cosponsorsI) => {
+    const parties = [];
+    if (cosponsorsD) {
+      parties.push(`
+        <div class="cosponsors-democrat">
+          <span class="cosponsors-d-title">Democratic Cosponsors:</span>
+          ${cosponsorsD}
+        </div>
+      `);
+    }
+    if (cosponsorsR) {
+      parties.push(`
+        <div class="cosponsors-republican">
+          <span class="cosponsors-r-title">Republican Cosponsors:</span>
+          ${cosponsorsR}
+        </div>
+      `);
+    }
+    if (cosponsorsI) {
+      parties.push(`
+        <div class="cosponsors-independent">
+          <span class="cosponsors-i-title">Independent Cosponsors:</span>
+          ${cosponsorsI}
+        </div>
+      `);
+    }
+    if (parties.length > 0) {
+      return `
+        <div class="cosponsors">
+          ${parties.join("")}
+        </div>
+      `;
+    }
+    return "";
+
+    // <div class="cosponsors">
+    //           <div class="cosponsors-democrat">
+    //             <span class="cosponsors-d-title">Democratic Cosponsors:</span>
+    //             ${cosponsorsD}
+    //           </div>
+    //           <div class="cosponsors-republican">
+    //             <span class="cosponsors-r-title">Republican Cosponsors:</span>
+    //             ${cosponsorsR}
+    //           </div>
+    //           <div class="cosponsors-independent">
+    //             <span class="cosponsors-i-title">Independent Cosponsors:</span>
+    //             ${cosponsorsI}
+    //           </div>
+    //         </div>
   };
 
   const listFilters = (bill) => {
