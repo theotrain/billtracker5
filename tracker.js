@@ -519,8 +519,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
         <div class="filter-section-group">`;
     const tagsHTML = filterTags.forEach((tagObject, idx) => {
       const isLast = filterTags.length == idx + 1;
+      const isSecond = idx == 1;
       if (isLast) filterHTML += `</div><div class="filter-section-group">`;
-      filterHTML += `<div class="filter-section">`;
+      let rule = idx == 1 ? "rule" : "";
+      filterHTML += `<div class="filter-section ${rule}">`;
       filterHTML += tagTitleTemplate(tagObject.title);
       filterHTML += tagObject.tags
         .map((tagName) => {
