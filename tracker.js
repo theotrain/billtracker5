@@ -2,11 +2,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
   let allBillsArray = [];
   let showThisMany = 5;
   const addThisMany = 1;
-  const insertHTML = () => {};
 
   const start = () => {
-    insertHTML();
-
     getSheetData({
       sheetName: "bills",
       query: "SELECT * WHERE E > date '2020-07-9' ORDER BY E DESC",
@@ -19,9 +16,18 @@ window.addEventListener("DOMContentLoaded", (event) => {
     allBillsArray = bills;
     displayBills(allBillsArray);
     console.log("dolla dolla bills: ", bills);
+    // loadContainerQueryPolyfill();
+  };
+
+  const loadContainerQueryPolyfill = () => {
+    if (!("container" in document.documentElement.style)) {
+      console.log("loading polyfill!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      import("https://cdn.skypack.dev/container-query-polyfill");
+    }
   };
 
   const stringToList = (str) => {
+    if (str.trim() === "") return "";
     return (
       "<ul>" +
       str
@@ -54,8 +60,9 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const number = bill["Number"];
     const sponsor = bill["Sponsor"];
     const summary = stringToHTML(bill["Summary"]);
-    const support = stringToHTML(bill["Support"]);
+    const support = bill["Support"];
     const analysis = stringToList(bill["Analysis"]);
+    const notes = bill["Notes"];
     const democrat = bill["Democrat"];
     const republican = bill["Republican"];
     const independent = bill["Independent"];
@@ -82,18 +89,24 @@ window.addEventListener("DOMContentLoaded", (event) => {
             <div class="bill-label">Lead Sponsor</div>
             <div class="sponsor">${sponsor}</div>
             <div class="cosponsor-quantity">/ ${quantity} Cosponsors</div>
-            <div class="bill-progress">
-              <ul>
-                <li class="active">Introduced</li>
-                <li ${
-                  progress1 ? 'class="active"' : ""
-                }>Approved By Committee</li>
-                <li ${progress2 ? 'class="active"' : ""}>Passed House</li>
-                <li ${progress3 ? 'class="active"' : ""}>Passed Senate</li>
-                <li ${progress4 ? 'class="active"' : ""}>To President</li>
-                <li ${progress5 ? 'class="active"' : ""}>Became Law</li>
-              </ul>
+            <div class="bill-progress-wrap">
+              <div class="bill-progress">
+                <ul>
+                  <li class="active">Introduced</li>
+                  <li ${
+                    progress1 ? 'class="active"' : ""
+                  }>Approved By Committee</li>
+                  <li ${progress2 ? 'class="active"' : ""}>Passed House</li>
+                  <li ${progress3 ? 'class="active"' : ""}>Passed Senate</li>
+                  <li ${progress4 ? 'class="active"' : ""}>To President</li>
+                  <li ${progress5 ? 'class="active"' : ""}>Became Law</li>
+                </ul>
+              </div>
             </div>
+          </div>
+          <div class="bill-mobile-sidebar">
+            ${aboveTheFoldFiltersTemplate(bill)}
+            ${listFilters(bill)}
           </div>
           <div class="bill-summary">
             <div class="bill-label">Summary</div>
@@ -106,6 +119,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
             <p>
             ${analysis}
             </p>
+            ${notesIfExists(notes)}
             ${cosponsorsTemplate(cosponsorsD, cosponsorsR, cosponsorsI)}
 
           </div>
@@ -115,7 +129,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
             ${listFilters(bill)}
         </div>
         <button type="button" class="bill-showhide">
-          <span class="showhide-text">SHOW DETAILS</span>
+          <span class="showhide-text">SHOW MORE</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="10.958" height="6.893" viewBox="0 0 10.958 6.893">
             <path id="Path_29" data-name="Path 29" d="M321.357,2054.082l4.772,4.772,4.772-4.772"
               transform="translate(-320.65 -2053.375)" fill="none" stroke-width="2"></path>
@@ -217,12 +231,27 @@ window.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const supportIfExists = (support) => {
-    if (!support) return "";
+    console.log("support:", support);
+    console.log("support length:", support.length);
+    if (!support.trim()) return "";
     return `
       <div class="bill-section-spacer"></div>
       <div class="bill-label">Support</div>
       <p>
-      ${linksToHTML(support)}
+      ${linksToHTML(stringToList(support))}
+      </p>
+    `;
+  };
+
+  const notesIfExists = (notes) => {
+    // console.log("notes:", notes);
+    // console.log("notes length:", notes.length);
+    if (!notes.trim()) return "";
+    return `
+      <div class="bill-section-spacer"></div>
+      <div class="bill-label">Notes</div>
+      <p>
+      ${linksToHTML(stringToList(notes))}
       </p>
     `;
   };
@@ -292,11 +321,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
       }
     });
 
-    return elements.join("");
+    return `<div class="sidebar-icons">${elements.join("")}</div>`;
   };
 
   const displayBills = (bills = allBillsArray) => {
     // showThisMany
+    console.log("DISPLAY BILLS: ", bills);
     const billsElement = document.querySelector("#bills");
     if (bills.length == 0) {
       billsElement.innerHTML = "<h3>There are no bills to display.<h3>";
@@ -341,26 +371,26 @@ window.addEventListener("DOMContentLoaded", (event) => {
       legislators.style.display = "flex";
     });
 
-    function openCity(evt, cityName) {
-      // Declare all variables
-      var i, tabcontent, tablinks;
+    // function openCity(evt, cityName) {
+    //   // Declare all variables
+    //   var i, tabcontent, tablinks;
 
-      // Get all elements with class="tabcontent" and hide them
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
+    //   // Get all elements with class="tabcontent" and hide them
+    //   tabcontent = document.getElementsByClassName("tabcontent");
+    //   for (i = 0; i < tabcontent.length; i++) {
+    //     tabcontent[i].style.display = "none";
+    //   }
 
-      // Get all elements with class="tablinks" and remove the class "active"
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
+    //   // Get all elements with class="tablinks" and remove the class "active"
+    //   tablinks = document.getElementsByClassName("tablinks");
+    //   for (i = 0; i < tablinks.length; i++) {
+    //     tablinks[i].className = tablinks[i].className.replace(" active", "");
+    //   }
 
-      // Show the current tab, and add an "active" class to the button that opened the tab
-      document.getElementById(cityName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
+    //   // Show the current tab, and add an "active" class to the button that opened the tab
+    //   document.getElementById(cityName).style.display = "block";
+    //   evt.currentTarget.className += " active";
+    // }
 
     const billShowHideButtons = document.querySelectorAll(".bill-showhide");
     for (let i = 0; i < billShowHideButtons.length; i++) {
@@ -369,25 +399,39 @@ window.addEventListener("DOMContentLoaded", (event) => {
         this.classList.toggle("active");
         //get "bill-summary" element
         var content = $(this.parentNode.querySelector(".bill-summary"));
-        var sidebarTags = $(this.parentNode.querySelector(".tag-section"));
+        // var sidebarTags = $(this.parentNode.querySelector(".tag-section"));
+        var sidebarTags = this.parentNode.querySelectorAll(".tag-section");
+        console.log("sidebar tags thius:", this);
+        console.log("sidebar tags thius parent:", this.parentNode);
+        // console.log(
+        //   "sidebar tags:",
+        //   this.parentNode.querySelector(".tag-section")
+        // );
         // var content = $(
         //   this.previousElementSibling.previousElementSibling.children[1]
         // );
         // if (content.style.display === "block") {
         if (this.classList.contains("active")) {
           // content.style.marginTop = "16px";
-          textElement.innerHTML = "HIDE DETAILS";
-          // content.style.display = "block";
+          textElement.innerHTML = "SHOW LESS";
           // content.style.maxHeight = "100vh";
           content.slideDown(250);
-          sidebarTags.show();
+          // sidebarTags.show();
+          sidebarTags.forEach((tagDiv) => {
+            tagDiv.style.display = "flex";
+          });
+          // sidebarTags.style.display = "block";
         } else {
           // content.style.marginTop = "0px";
           textElement.innerHTML = "SHOW DETAILS";
           // content.style.display = "none";
           // content.style.maxHeight = "0px";
           content.slideUp(250);
-          sidebarTags.hide();
+          // sidebarTags.hide();
+          sidebarTags.forEach((tagDiv) => {
+            tagDiv.style.display = "none";
+          });
+          // sidebarTags.style.display = "none";
         }
       });
     }
@@ -405,6 +449,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   const filterTags = [
     {
+      title: "IMPORTANCE TO SOIL HEALTH",
+      tags: ["Core", "Secondary"],
+    },
+    {
       title: "CHAMBER",
       tags: ["House", "Senate", "Bicameral"],
     },
@@ -415,6 +463,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
     {
       title: "CONGRESS",
       tags: ["116th", "117th", "118th"],
+    },
+    {
+      title: "BILL TYPE",
+      tags: ["Omnibus Package", "Resolution"],
     },
     {
       title: "ISSUE AREAS",
@@ -437,34 +489,37 @@ window.addEventListener("DOMContentLoaded", (event) => {
         "Removing Barriers",
       ],
     },
-    {
-      title: "BILL TYPE",
-      tags: ["Omnibus Package", "Resolution"],
-    },
-    {
-      title: "IMPORTANCE TO SOIL HEALTH",
-      tags: ["Core", "Secondary"],
-    },
   ];
 
   const initMoreButton = () => {
     const moreButton = document.querySelector("#more button");
     if (moreButton) {
-      console.log("more button: ", moreButton);
+      // console.log("more button: ", moreButton);
       moreButton.addEventListener("click", (e) => moreButtonAction());
     }
   };
 
   const moreButtonAction = (e) => {
     showThisMany += addThisMany;
-    console.log("more ", showThisMany);
+    // console.log("more ", showThisMany);
     displayBills();
   };
 
   const initFilters = () => {
     const filterElement = document.querySelector("#filters");
-    let filterHTML = "";
-    const tagsHTML = filterTags.forEach((tagObject) => {
+    // let filterHTML = "";
+    filterHTML = `
+      <div id="close-filters"></div>
+      <h3>Filter by:</h3>
+      <form id="search-form">
+        <button type="submit">Search</button>
+        <input type="search" placeholder="Search...">
+      </form>
+      <div id="filter-sections">
+        <div class="filter-section-group">`;
+    const tagsHTML = filterTags.forEach((tagObject, idx) => {
+      const isLast = filterTags.length == idx + 1;
+      if (isLast) filterHTML += `</div><div class="filter-section-group">`;
       filterHTML += `<div class="filter-section">`;
       filterHTML += tagTitleTemplate(tagObject.title);
       filterHTML += tagObject.tags
@@ -473,34 +528,115 @@ window.addEventListener("DOMContentLoaded", (event) => {
         })
         .join("");
       filterHTML += `</div>`;
+      // if (isLast) filterHTML += `</div>`;
     });
+    filterHTML += `
+      </div></div>
+        <a href="#" id="clear-filters">Clear All Filters</a>
+      </div>
+      `;
     filterElement.innerHTML = filterHTML;
 
     // console.log(tagName);
     // console.log(tagsHTML);
+    setFormActions();
     setFilterActions();
+  };
+
+  const setFormActions = () => {
+    document.querySelector("#search-form").onsubmit = clickSearch;
+    document
+      .querySelector("#clear-filters")
+      .addEventListener("click", clearFilters);
+    //clear search when X close is hit in search bar
+    document
+      .querySelector("#search-form")
+      .addEventListener("search", clearSearchInput);
+  };
+
+  const clearFilters = (e) => {
+    e.preventDefault();
+    //clear checkboxes
+    const checkboxes = document.querySelectorAll(
+      "#filters input[type=checkbox]"
+    );
+    checkboxes.forEach((box) => (box.checked = false));
+    document.querySelector("#filters input[type=search]").value = "";
+    displayBills();
   };
 
   const setFilterActions = () => {
     const checkBoxes = document.querySelectorAll("#filters .tagCheckbox");
-    checkBoxes.forEach((checkbox) =>
-      checkbox.addEventListener("change", (e) => filterBills())
+    checkBoxes.forEach(
+      (checkbox) => checkbox.addEventListener("change", (e) => clickSearch())
+      // checkbox.addEventListener("change", (e) => filterBills())
     );
+    document.querySelector("#show-filters").addEventListener("click", (e) => {
+      setModalFiltersVisibility(true);
+    });
+    document.querySelector("#close-filters").addEventListener("click", (e) => {
+      setModalFiltersVisibility(false);
+    });
   };
 
-  const filterBills = () => {
+  const setModalFiltersVisibility = (visible = true) => {
+    if (visible) {
+      document.querySelector("#tracker").classList.add("show-modal-filters");
+    } else {
+      document.querySelector("#tracker").classList.remove("show-modal-filters");
+    }
+  };
+
+  const clickSearch = (e) => {
+    if (e) e.preventDefault();
+    console.log("clicksearch: ", e);
+    const term = document
+      .querySelector("#search-form input")
+      .value.trim()
+      .toLowerCase();
+    if (term === "") {
+      console.log("search empty");
+      filterBills();
+      return;
+    }
+    // console.log(
+    //   "click search: ",
+    //   JSON.stringify(Object.values(allBillsArray[0]).join("").toLowerCase())
+    // );
+    const billsWithTerm = allBillsArray.filter((bill) => {
+      const billText = Object.values(bill).join("").toLowerCase();
+      return billText.includes(term);
+    });
+    filterBills(billsWithTerm);
+  };
+
+  const clearSearchInput = (e) => {
+    // console.log("search event detced");
+    if (event) event.preventDefault();
+    // console.log("search event: ", event);
+    const term = document
+      .querySelector("#search-form input")
+      .value.trim()
+      .toLowerCase();
+    // console.log("search term: ", term);
+    if (term === "") filterBills();
+  };
+
+  const filterBills = (bills = allBillsArray) => {
     // console.log("filter bills");
     const filters = getCheckedFilters();
-    console.log(filters);
-    console.log(allBillsArray);
+    console.log("FILTERBILLS filters:", filters);
+    console.log("FILTERBILLS bills passed in:", bills);
     if (filters.length === 0) {
-      displayBills();
+      console.log("no filters!");
+      displayBills(bills);
       return;
     }
     // create array of bill objects from allBillsArray
     // and pass to displayBills(bills)
+    console.log("filterING!");
     displayBills(
-      allBillsArray.filter((bill) => {
+      bills.filter((bill) => {
         return filters.some((filterName) => {
           // console.log(filterName);
           // console.log(bill[filterName]);
@@ -525,10 +661,13 @@ window.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const tagCheckboxTemplate = (tagName) => {
+    let tagText = tagName;
+    if (tagName == "Democrat") tagText = "Democrat Only";
+    if (tagName == "Republican") tagText = "Republican Only";
     return `
       <label class="filter-check">
       <input class="tagCheckbox" type="checkbox" name="${tagName}" />
-      <span>${tagName}</span>
+      <span>${tagText}</span>
       </label>`;
   };
 

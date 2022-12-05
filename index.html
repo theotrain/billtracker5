@@ -10,9 +10,21 @@
   <link rel="stylesheet" href="reset.css" />
   <script src="https://code.jquery.com/jquery-3.6.1.min.js"
     integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <!-- <script src="https://unpkg.com/container-query-polyfill/cqfill.iife.min.js"></script> -->
+  <script type="module">
+    console.log('POLYFILL+++++++++============-------------')
+    if (!("container" in document.documentElement.style)) {
+      import("https://unpkg.com/container-query-polyfill@^0.2.0");
+    }
+  </script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.21/jquery.csv.min.js"
     integrity="sha512-Y8iWYJDo6HiTo5xtml1g4QqHtl/PO1w+dmUpQfQSOTqKNsMhExfyPN2ncNAe9JuJUSKzwK/b6oaNPop4MXzkwg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  <!-- <script type="module" defer>
+    if (!("container" in document.documentElement.style)) {
+      import("https://unpkg.com/container-query-polyfill@^0.2.0");
+    }
+  </script> -->
   <script src="getSheetData.js" type="text/javascript" defer></script>
   <script src="tracker.js" type="text/javascript" defer></script>
   <!-- <script src="node_modules/g-sheets-api/build/gsheetsapi.js" type="module" defer></script> -->
@@ -35,6 +47,9 @@
     </div>
 
     <div id="tracker" class="tab-section">
+      <div id="show-filters-box">
+        <div id="show-filters">Filter By</div>
+      </div>
       <div id="filters">
         <!-- <div class="filter-section">
           <div class="filter-section-title">CONGRESS</div>
