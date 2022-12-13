@@ -1,21 +1,78 @@
 window.addEventListener("DOMContentLoaded", (event) => {
   let allBillsArray = [];
-  let showThisMany = 5;
-  const addThisMany = 1;
+  let showThisMany = 30;
+  const addThisMany = 30;
+  let showingBills = 0;
+  let allBillsLoaded = false;
 
   const start = () => {
+    // getSheetData({
+    //   sheetName: "test bills",
+    //   query: "SELECT * WHERE E > date '2020-07-9' ORDER BY E DESC",
+    //   callback: getBillsResponse,
+    // });
     getSheetData({
       sheetName: "bills",
-      query: "SELECT * WHERE E > date '2020-07-9' ORDER BY E DESC",
-      callback: getBillsResponse,
+      query: "SELECT * WHERE I > date '2021-08-1' ORDER BY I DESC",
+      callback: getBillsResponse1,
     });
   };
 
-  const getBillsResponse = (bills) => {
+  const billNumberToFullText = (num) => {
+    // get number like "H.R.5376", return "House Bill H.R.5376"
+    if (num.includes(" ")) {
+      num = num.split(" ").join("");
+    }
+    if (num.startsWith("H.Con.Res")) {
+      return "House Concurrent Resolution " + num;
+    }
+    if (num.startsWith("S.Con.Res")) {
+      return "Senate Concurrent Resolution " + num;
+    }
+    if (num.startsWith("H.Res")) {
+      return "House Resolution " + num;
+    }
+    if (num.startsWith("S.Res")) {
+      return "Senate Resolution " + num;
+    }
+    if (num.startsWith("H.R")) {
+      return "House Bill " + num;
+    }
+    if (num.startsWith("S.")) {
+      return "Senate Bill " + num;
+    }
+    return num;
+    // S.Res.43 -> Senate Resolution S.Res.43
+    // H.Res.427 -> House Resolution H.Res.427
+    // H.R.3684 -> House Bill H.R.3684
+    // S.2522 -> Senate Bill S.2522
+    // H.Con.Res.88 -> House Concurrent Resolution H.Con.Res.88
+    // S.Con.Res.14 -> Senate Concurrent Resolution S.Con.Res.14
+  };
+
+  const getBillsResponse1 = (bills) => {
     //bill is array of objects
     allBillsArray = bills;
     displayBills(allBillsArray);
-    console.log("dolla dolla bills: ", bills);
+    console.log("first bills loaded: ", bills);
+
+    getSheetData({
+      sheetName: "bills",
+      query: "SELECT * WHERE I <= date '2021-08-1' ORDER BY I DESC",
+      callback: getBillsResponse2,
+    });
+    // loadContainerQueryPolyfill();
+  };
+
+  const getBillsResponse2 = (bills) => {
+    //bill is array of objects
+    allBillsArray.push(...bills);
+    allBillsLoaded = true;
+    let spinner = document.querySelector("#more .spinner");
+    if (spinner) spinner.style = "display: none";
+    // displayBills(allBillsArray);
+    console.log("second bills loaded: ", bills);
+    console.log("new all bills: ", allBillsArray);
     // loadContainerQueryPolyfill();
   };
 
@@ -63,44 +120,37 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const support = bill["Support"];
     const analysis = stringToList(bill["Analysis"]);
     const notes = bill["Notes"];
-    const democrat = bill["Democrat"];
-    const republican = bill["Republican"];
-    const independent = bill["Independent"];
+    const democrat = bill["Democrat Only"];
+    const republican = bill["Republican Only"];
+    const independent = bill["Independent Only"];
     const bipartisan = bill["Bipartisan"];
     const boldChanges = bill["Bold Changes"];
     const practical = bill["Practical Infrastructure"];
     const omnibus = bill["Omnibus Bill"];
     const newIncentive = bill["New Incentive"];
-    const progress1 = bill["Approved By Committee"];
-    const progress2 = bill["Passed House"];
-    const progress3 = bill["Passed Senate"];
-    const progress4 = bill["To President"];
-    const progress5 = bill["Passed"];
     const cosponsorsD = bill["Cosponsors (D)"].trim();
     const cosponsorsR = bill["Cosponsors (R)"].trim();
     const cosponsorsI = bill["Cosponsors (I)"].trim();
 
+    let sponsorClass = "democrat";
+    if (sponsor.toLowerCase().includes("(r")) sponsorClass = "republican";
+    if (sponsor.toLowerCase().includes("(i")) sponsorClass = "independent";
+
     return `<div class="bill">
         <div class="bill-main">
           <div class="bill-header">
-            <a href="${link}" target="_blank" class="bill-number">${number}</a>
+            <a href="${link}" target="_blank" class="bill-number">
+              ${billNumberToFullText(number)}
+            </a>
+            ${companionBillTemplate(bill)}
             <div class="title">${name}</div>
 
             <div class="bill-label">Lead Sponsor</div>
-            <div class="sponsor">${sponsor}</div>
+            <div class="sponsor ${sponsorClass}">${sponsor}</div>
             <div class="cosponsor-quantity">/ ${quantity} Cosponsors</div>
             <div class="bill-progress-wrap">
               <div class="bill-progress">
-                <ul>
-                  <li class="active">Introduced</li>
-                  <li ${
-                    progress1 ? 'class="active"' : ""
-                  }>Approved By Committee</li>
-                  <li ${progress2 ? 'class="active"' : ""}>Passed House</li>
-                  <li ${progress3 ? 'class="active"' : ""}>Passed Senate</li>
-                  <li ${progress4 ? 'class="active"' : ""}>To President</li>
-                  <li ${progress5 ? 'class="active"' : ""}>Became Law</li>
-                </ul>
+                ${progressTemplate(bill)}
               </div>
             </div>
           </div>
@@ -136,6 +186,51 @@ window.addEventListener("DOMContentLoaded", (event) => {
           </svg>
         </button>
     </div>`;
+  };
+
+  const progressTemplate = (bill) => {
+    const progress1 = bill["Approved By Committee"];
+    const progress2 = bill["Passed House"];
+    const progress3 = bill["Passed Senate"];
+    const progress4 = bill["To President"];
+    const progress5 = bill["Passed"];
+    const resolution = bill["Resolution"];
+    const number = bill["Number"];
+
+    // console.log("resolution out: ", resolution);
+
+    if (resolution) {
+      console.log("resolution in: ", resolution);
+      let agreedText = "Agreed to in House";
+      if (number.startsWith("S")) {
+        agreedText = "Agreed to in Senate";
+      }
+      return `
+      <ul>
+        <li class="active">Introduced</li>
+        <li ${progress5 ? 'class="active"' : ""}>${agreedText}</li>
+      </ul>
+      `;
+    }
+
+    return `
+    <ul>
+      <li class="active">Introduced</li>
+      <li ${progress1 ? 'class="active"' : ""}>Approved By Committee</li>
+      <li ${progress2 ? 'class="active"' : ""}>Passed House</li>
+      <li ${progress3 ? 'class="active"' : ""}>Passed Senate</li>
+      <li ${progress4 ? 'class="active"' : ""}>To President</li>
+      <li ${progress5 ? 'class="active"' : ""}>Became Law</li>
+    </ul>`;
+  };
+
+  const companionBillTemplate = (bill) => {
+    const companion = bill["Companion Bill"].trim();
+    const bicameral = bill["Bicameral"];
+    if (bicameral && companion != "") {
+      return `<span class="companion-bill">Companion Bill is ${companion}</span>`;
+    }
+    return "";
   };
 
   const cosponsorsTemplate = (cosponsorsD, cosponsorsR, cosponsorsI) => {
@@ -231,8 +326,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const supportIfExists = (support) => {
-    console.log("support:", support);
-    console.log("support length:", support.length);
+    // console.log("support:", support);
+    // console.log("support length:", support.length);
     if (!support.trim()) return "";
     return `
       <div class="bill-section-spacer"></div>
@@ -259,28 +354,28 @@ window.addEventListener("DOMContentLoaded", (event) => {
   const linksToHTML = (text) => {
     const sections = text.split("]]");
     if (sections.length === 1) return text;
-    console.log("sections: ", sections);
-    console.log("------============++++++++++++==========-------------");
+    // console.log("sections: ", sections);
+    // console.log("------============++++++++++++==========-------------");
     let revisedSections = sections.map((section) => {
       if (section == "") return "";
-      console.log("section", section);
+      // console.log("section", section);
       let split = section.split("[[");
       if (split.length === 1) return section;
-      console.log("split", split);
+      // console.log("split", split);
       let linkOnly = split.slice(-1)[0].trim();
-      console.log("linkOnly", linkOnly);
+      // console.log("linkOnly", linkOnly);
       let linkOnlySplit = linkOnly.split(" ");
       if (linkOnlySplit.length === 1) return split.join("");
       let url = linkOnlySplit.slice(-1)[0];
       let html = `<a href="${url}">${linkOnlySplit.slice(0, -1).join(" ")}</a>`;
-      console.log(
-        "mapping return pre-replacement: ",
-        split.slice(0, -1).join("")
-      );
+      // console.log(
+      // "mapping return pre-replacement: ",
+      // split.slice(0, -1).join("")
+      // );
       return split.slice(0, -1).join("") + html;
     });
-    console.log("------============++++++++++++==========-------------");
-    console.log("revised sections: ", revisedSections);
+    // console.log("------============++++++++++++==========-------------");
+    // console.log("revised sections: ", revisedSections);
     return revisedSections.join("");
   };
 
@@ -289,9 +384,13 @@ window.addEventListener("DOMContentLoaded", (event) => {
       { text: "116th Congress", prop: "116th", file: "congress.jpg" },
       { text: "117th Congress", prop: "117th", file: "congress.jpg" },
       { text: "118th Congress", prop: "118th", file: "congress.jpg" },
-      { text: "Democrat", prop: "Democrat", file: "democrat.jpg" },
-      { text: "Republican", prop: "Republican", file: "republican.jpg" },
-      { text: "Independent", prop: "Independent", file: "independent.jpg" },
+      { text: "Democrat", prop: "Democrat Only", file: "democrat.jpg" },
+      { text: "Republican", prop: "Republican Only", file: "republican.jpg" },
+      {
+        text: "Independent",
+        prop: "Independent Only",
+        file: "independent.jpg",
+      },
       { text: "Bipartisan", prop: "Bipartisan", file: "bipartisan.jpg" },
       { text: "Introduced", prop: "Introduced", file: "calendar.jpg" },
       { text: "Last Action", prop: "Last Action", file: "calendar-last.jpg" },
@@ -307,6 +406,17 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
     mainFilterData.forEach((filter) => {
       if (bill[filter.prop]) {
+        // place text "senate, house, bicameral" before "117th congress"
+        if (filter.file == "congress.jpg") {
+          if (bill["Bicameral"]) {
+            filter.text = "Bicameral " + filter.text;
+          } else if (bill["Number"].startsWith("S")) {
+            filter.text = "Senate " + filter.text;
+          } else if (bill["Number"].startsWith("H")) {
+            filter.text = "House " + filter.text;
+          }
+        }
+
         elements.push(`
         <div class="icon-plus-text">
           <img src="./icons/${filter.file}" class="icon" />
@@ -324,9 +434,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
     return `<div class="sidebar-icons">${elements.join("")}</div>`;
   };
 
-  const displayBills = (bills = allBillsArray) => {
+  const displayBills = (bills = allBillsArray, isFiltered = false) => {
     // showThisMany
-    console.log("DISPLAY BILLS: ", bills);
+    let showingAllBills = bills === allBillsArray;
+    showingBills = bills.length;
+    console.log("showingAllBills: ", showingAllBills);
+    console.log("showingBills: ", showingBills);
     const billsElement = document.querySelector("#bills");
     if (bills.length == 0) {
       billsElement.innerHTML = "<h3>There are no bills to display.<h3>";
@@ -334,22 +447,52 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
     // console.log("displayBills: ", bills);
     // console.log(billTemplate(bills[0]));
-    if (anyFiltersChecked()) {
+    if (isFiltered) {
+      console.log("showing filtered bills: ", bills);
       showBills = bills.map((bill) => billTemplate(bill));
       billsElement.innerHTML = showBills.join("");
     } else {
       // only limit display quantity and show more button when all filters off
       let showBills = bills.slice(0, showThisMany);
+      showingBills = showBills.length;
       showBills = showBills.map((bill) => billTemplate(bill));
       // console.log(allBills.join(""));
+      console.log("showing unfiltered bills: ", bills);
+      console.log(
+        "showing more?: ",
+        showingAllBills && showBills.length < allBillsArray.length
+      );
       let moreButtonHTML =
-        showBills.length < allBillsArray.length
-          ? "<div id='more'><button>Show More</button></div>"
+        showingAllBills && showBills.length < allBillsArray.length
+          ? showMoreButtonTemplate()
           : "";
       billsElement.innerHTML = showBills.join("") + moreButtonHTML;
     }
     addShowHideClickEvents();
     initMoreButton();
+  };
+
+  const showMoreButtonTemplate = () => {
+    if (allBillsLoaded) {
+      return `
+      <div id='more'>
+        <button>Show More</button>
+      </div>`;
+    } else {
+      return `
+      <div id='more'>
+      <button>Show More</button>
+      <div class="spinner">
+          <div class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          LOADING BILLS...
+        </div>
+    </div>`;
+    }
   };
 
   const addShowHideClickEvents = () => {
@@ -401,8 +544,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
         var content = $(this.parentNode.querySelector(".bill-summary"));
         // var sidebarTags = $(this.parentNode.querySelector(".tag-section"));
         var sidebarTags = this.parentNode.querySelectorAll(".tag-section");
-        console.log("sidebar tags thius:", this);
-        console.log("sidebar tags thius parent:", this.parentNode);
+        // console.log("sidebar tags thius:", this);
+        // console.log("sidebar tags thius parent:", this.parentNode);
         // console.log(
         //   "sidebar tags:",
         //   this.parentNode.querySelector(".tag-section")
@@ -423,7 +566,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
           // sidebarTags.style.display = "block";
         } else {
           // content.style.marginTop = "0px";
-          textElement.innerHTML = "SHOW DETAILS";
+          textElement.innerHTML = "SHOW MORE";
           // content.style.display = "none";
           // content.style.maxHeight = "0px";
           content.slideUp(250);
@@ -458,7 +601,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
     },
     {
       title: "PARTY SUPPORT",
-      tags: ["Democrat", "Republican", "Independent", "Bipartisan"],
+      tags: [
+        "Democrat Only",
+        "Republican Only",
+        "Independent Only",
+        "Bipartisan",
+      ],
     },
     {
       title: "CONGRESS",
@@ -509,7 +657,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const filterElement = document.querySelector("#filters");
     // let filterHTML = "";
     filterHTML = `
-      <div id="close-filters"></div>
+      <div id="close-filters">APPLY<img src="./icons/close.svg" /></div>
       <h3>Filter by:</h3>
       <form id="search-form">
         <button type="submit">Search</button>
@@ -609,7 +757,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       const billText = Object.values(bill).join("").toLowerCase();
       return billText.includes(term);
     });
-    filterBills(billsWithTerm);
+    filterBills(billsWithTerm, true);
   };
 
   const clearSearchInput = (e) => {
@@ -624,19 +772,41 @@ window.addEventListener("DOMContentLoaded", (event) => {
     if (term === "") filterBills();
   };
 
-  const filterBills = (bills = allBillsArray) => {
+  const filterBills = (bills = allBillsArray, isFiltered = false) => {
     // console.log("filter bills");
-    const filters = getCheckedFilters();
+    // const filters = getCheckedFilters();
+    const filters = getCheckedFiltersExceptCoreSecondary();
     console.log("FILTERBILLS filters:", filters);
+    console.log("filterING!");
+    // make sure core and secondary filter first to exlude AND
+    if (isChecked("Core") && !isChecked("Secondary")) {
+      //remove all bills that are not core
+      isFiltered = true;
+      bills = bills.filter((bill) => {
+        // console.log("bill core:", bill["Core"]);
+        if (bill["Core"]) return true;
+        return false;
+      });
+      console.log("AFTER REMOVIng copre filters: ", bills);
+    }
+    if (isChecked("Secondary") && !isChecked("Core")) {
+      isFiltered = true;
+      //remove all bills that are not secondary
+      bills = bills.filter((bill) => {
+        // console.log("bill core:", bill["Core"]);
+        if (bill["Secondary"]) return true;
+        return false;
+      });
+      console.log("AFTER REMOVIng secondary filters: ", bills);
+    }
     console.log("FILTERBILLS bills passed in:", bills);
     if (filters.length === 0) {
       console.log("no filters!");
-      displayBills(bills);
+      displayBills(bills, isFiltered);
       return;
     }
     // create array of bill objects from allBillsArray
     // and pass to displayBills(bills)
-    console.log("filterING!");
     displayBills(
       bills.filter((bill) => {
         return filters.some((filterName) => {
@@ -644,12 +814,28 @@ window.addEventListener("DOMContentLoaded", (event) => {
           // console.log(bill[filterName]);
           return bill[filterName];
         });
-      })
+      }),
+      true
     );
   };
 
   const anyFiltersChecked = () => {
-    getCheckedFilters().length;
+    getCheckedFilters().length > 0;
+  };
+
+  const getCheckedFiltersExceptCoreSecondary = () => {
+    const checkBoxes = document.querySelectorAll("#filters .tagCheckbox");
+    filterNames = [];
+    checkBoxes.forEach((checkBox) => {
+      if (
+        checkBox.checked &&
+        checkBox.name !== "Core" &&
+        checkBox.name !== "Secondary"
+      )
+        filterNames.push(checkBox.name);
+    });
+    // console.log(filterNames)
+    return filterNames;
   };
 
   const getCheckedFilters = () => {
@@ -658,14 +844,21 @@ window.addEventListener("DOMContentLoaded", (event) => {
     checkBoxes.forEach((checkBox) => {
       if (checkBox.checked) filterNames.push(checkBox.name);
     });
-    // console.log(filterNames)
+    console.log(filterNames);
     return filterNames;
+  };
+
+  const isChecked = (filterName) => {
+    const checkBox = document.querySelector(
+      `#filters .tagCheckbox[name=${filterName}]`
+    );
+    return checkBox.checked;
   };
 
   const tagCheckboxTemplate = (tagName) => {
     let tagText = tagName;
-    if (tagName == "Democrat") tagText = "Democrat Only";
-    if (tagName == "Republican") tagText = "Republican Only";
+    // if (tagName == "Democrat") tagText = "Democrat Only";
+    // if (tagName == "Republican") tagText = "Republican Only";
     return `
       <label class="filter-check">
       <input class="tagCheckbox" type="checkbox" name="${tagName}" />
