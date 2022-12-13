@@ -13,7 +13,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     // });
     getSheetData({
       sheetName: "bills",
-      query: "SELECT * WHERE I > date '2021-08-1' ORDER BY I DESC",
+      query: "SELECT * WHERE H > date '2021-08-1' ORDER BY I DESC",
       callback: getBillsResponse1,
     });
   };
@@ -60,7 +60,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
     getSheetData({
       sheetName: "bills",
-      query: "SELECT * WHERE I <= date '2021-08-1' ORDER BY I DESC",
+      query: "SELECT * WHERE H <= date '2021-08-1' ORDER BY I DESC",
       callback: getBillsResponse2,
     });
     // loadContainerQueryPolyfill();
