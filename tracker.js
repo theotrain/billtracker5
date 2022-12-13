@@ -55,6 +55,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
     allBillsArray = bills;
     displayBills(allBillsArray);
     console.log("first bills loaded: ", bills);
+    // let filters = document.querySelector("#filters");
+    // if (filters) filters.style = "display: flex";
 
     getSheetData({
       sheetName: "bills",
