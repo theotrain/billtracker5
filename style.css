@@ -32,7 +32,24 @@ main {
   /* font-size: 24px; */
   padding: 35px 0;
 }
-
+.soon {
+  font-size: 1.2em;
+  text-align: center;
+}
+#beta {
+  font-weight: bold;
+  font-size: .8em;
+  letter-spacing: .1em;
+  display: block;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 1.5em;
+  line-height: 1.5em;
+  width: 70px;
+  text-align: center;
+  background-color: #ddd;
+}
 #intro {
   text-align: center;
   max-width: 550px;
@@ -80,6 +97,7 @@ main {
 }
 #legislators {
   display: none;
+  justify-content: flex-start;
 }
 
 .bill {
@@ -229,13 +247,20 @@ main {
   margin-right: 12px;
   text-decoration: none;
 }
-.bill .bill-number:hover {
+.bill .bill-number:hover, .bill .companion-bill:hover {
   text-decoration: underline;
 }
 .bill a[target="_blank"].bill-number::after {
-  color: var(--land-blue);
-  content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-  margin: 0px 3px 0px 5px;
+  content: "";
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+  /* fill: var(--land-blue); */
+  /* content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==); */
+  background: url("./icons/new-tab-blue.jpg");
+  /* background-color: blue; */
+  margin: 0px 3px -1px 4px;
+  background-size: 100%;
 }
 
 .bill + .bill {
@@ -368,6 +393,50 @@ main {
   display: inline-block;
   color: #888;
   /* line-height: .1em; */
+}
+.companion-section a {
+  text-decoration: none;
+}
+.bill a[target="_blank"].companion-bill::after {
+  background: url("./icons/new-tab-grey.jpg");
+  content: "";
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+  /* fill: var(--land-blue); */
+  /* content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==); */
+  margin: 0px 3px -1px 8px;
+  background-size: 100%;
+}
+.tiny-label {
+  display: block;
+  font-size: 0.9em;
+  letter-spacing: .1em;
+  color: #888;
+  margin-bottom: 2px;
+  border-bottom: 1px dashed var(--bill-outline);
+}
+.committee-section {
+  font-size: 0.9em;
+  margin-top: 32px;
+}
+.committee-section hr {
+  margin: .05em 0;
+  /* color: #ddd; */
+  border-top: 1px solid #ddd;
+  border-bottom: none;
+  /* background-color: #ddd; */
+}
+.committee {
+  font-weight: bold;
+  margin-top: 6px;
+}
+.subcommittee {
+  padding-left: 24px;
+  line-height: 1.4em;
+}
+.agency {
+  margin-top: 6px;
 }
 #filters{
   width: 260px;
@@ -581,17 +650,19 @@ main {
   /* border-bottom: 1px solid #ccc; */
   /* border-bottom: 2px dotted #ddd; */
   /* background-color: #f1f1f1; */
-  margin-bottom: 32px;
+  margin-bottom: 42px;
+  display: flex;
+  justify-content: center;
 }
 
 /* Style the buttons that are used to open the tab content */
 #tabs button {
   background-color: inherit;
   float: left;
-  /* border: 1px solid #ccc;  */
-  border: none; 
+  border: 2px solid var(--land-blue); 
+  /* border: none;  */
   /* border-radius: 10px 10px 0 0; */
-  border-bottom: none;
+  /* border-bottom: none; */
   outline: none;
   cursor: pointer;
   padding: 6px 12px;
@@ -605,9 +676,87 @@ main {
 /* Create an active/current tablink class */
 #tabs button.active {
   /* background-color: #999; */
-  color: black;
-  border-bottom: 2px dashed black;
+  color: white;
+  font-weight: bold;
+  /* border-bottom: 2px dashed black; */
+  background-color: var(--land-blue);
 }
+
+/* -------------------------------- */
+.switch-button {
+  background: #bbb;
+  border-radius: 30px;
+  /* border: 2px solid rgb(25, 114, 182); */
+  overflow: hidden;
+  width: 240px;
+  text-align: center;
+  /* font-size: 18px; */
+  letter-spacing: 0.02em;
+  color: white;
+  position: relative;
+  padding-right: 120px;
+  position: relative;
+}
+.switch-button:before {
+    content: "Legislators";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+.switch-button-checkbox {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 2;
+}
+
+.switch-button-checkbox:checked + .switch-button-label:before {
+    transform: translateX(120px);
+    transition: transform 200ms ease-in;
+  }
+
+.switch-button-checkbox + .switch-button-label {
+  position: relative;
+  padding: 8px 0;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+.switch-button-checkbox + .switch-button-label:before {
+  content: "";
+  /* background: var(--land-blue); */
+  box-shadow: 0px 0px 24px -2px rgba(0, 0, 0, 0.77);
+  -webkit-box-shadow: 0px 0px 24px -2px rgba(0, 0, 0, 0.77);
+  background: black;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 30px;
+  transform: translateX(0);
+  transition: transform 200ms ease-in;
+
+}
+
+.switch-button-label-span {
+  position: relative;
+}
+
+/* -------------------------------- */
 /* #bills li + li {
   margin-top: 0.8em;
 } */
@@ -683,6 +832,7 @@ main {
     z-index: 1;
     border-top: 1px solid;
     border-right: 1px solid;
+    background-color: inherit;
 }
 
 .bill-progress li:last-child {
@@ -937,10 +1087,11 @@ main {
     /* display: none; */
     width: 140px;
     margin: auto;
-    border: 2px solid var(--land-med-grey);
+    /* border: 2px solid var(--land-med-grey); */
+    border: 1px solid var(--bill-outline);
     background-color: var(--land-light-grey);
     padding: 8px 45px 8px 24px;
-    border-radius: 10px;
+    /* border-radius: 10px; */
     margin-bottom: 32px;
     font-size: 1.1em;
     cursor: pointer;
@@ -1109,11 +1260,23 @@ main {
   #filters {
      padding: 60px 25px;
   }
+  .bill .title {
+    font-size: 2em;
+  }
+}
+
+@media (max-width: 620px) {
+  .bill .title {
+    font-size: 1.8em;
+  }
 }
 
 @media (max-width: 530px) {
   .filter-section-group {
     max-width: 160px;
+  }
+  .bill .title {
+    font-size: 1.6em;
   }
 }
 

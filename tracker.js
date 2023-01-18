@@ -4,16 +4,38 @@ window.addEventListener("DOMContentLoaded", (event) => {
   const addThisMany = 30;
   let showingBills = 0;
   let allBillsLoaded = false;
+  let displayBillsSection = true;
+
+  const issueAreaTags = [
+    "Soil Health",
+    "Conservation Practices and Programs",
+    "Landscapes / Public Lands",
+    "Livestock / Grazing",
+    "Local / Regional Food Systems",
+    "Food Security",
+    "Ag Infrastructure / Supply Chain",
+    "Forestry / Wildfire",
+    "Water Issues",
+    "Row Crops",
+    "Concentration / Anti-trust",
+    "Jobs",
+    "Finance",
+    "Funding / Incentives / Grants",
+    "Taxes",
+    "Technical Assistance",
+    "Climate / Carbon Sequestration",
+    "Research",
+    "Crop Insurance",
+    "New Regulation",
+    "Deregulation",
+    "Removing Barriers",
+    "Marker Bill",
+  ];
 
   const start = () => {
-    // getSheetData({
-    //   sheetName: "test bills",
-    //   query: "SELECT * WHERE E > date '2020-07-9' ORDER BY E DESC",
-    //   callback: getBillsResponse,
-    // });
     getSheetData({
       sheetName: "bills",
-      query: "SELECT * WHERE H > date '2021-08-1' ORDER BY I DESC",
+      query: "SELECT * WHERE H > date '2021-08-1' ORDER BY H DESC",
       callback: getBillsResponse1,
     });
   };
@@ -60,7 +82,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
     getSheetData({
       sheetName: "bills",
-      query: "SELECT * WHERE H <= date '2021-08-1' ORDER BY I DESC",
+      query: "SELECT * WHERE H <= date '2021-08-1' ORDER BY H DESC",
       callback: getBillsResponse2,
     });
     // loadContainerQueryPolyfill();
@@ -75,7 +97,16 @@ window.addEventListener("DOMContentLoaded", (event) => {
     // displayBills(allBillsArray);
     console.log("second bills loaded: ", bills);
     console.log("new all bills: ", allBillsArray);
+    processCompanionLinks();
+    showAllBillDates();
     // loadContainerQueryPolyfill();
+  };
+
+  const showAllBillDates = () => {
+    console.log("ALL BILLS LOADED, DATES:");
+    allBillsArray.forEach((bill) => {
+      console.log(bill["Number"], bill["Last Action"]);
+    });
   };
 
   const loadContainerQueryPolyfill = () => {
@@ -105,9 +136,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       })
       .join("");
     const regex = /[\r\n]/g;
-    // console.log(p.replace(regex, 'ferret'));
     return paragraphs.replace(regex, "<br />");
-    // return paragraphs;
   };
 
   const billTemplate = (bill) => {
@@ -122,6 +151,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const support = bill["Support"];
     const analysis = stringToList(bill["Analysis"]);
     const notes = bill["Notes"];
+    const committees = bill["Committees"];
+    const agencies = bill["Agencies"];
     const democrat = bill["Democrat Only"];
     const republican = bill["Republican Only"];
     const independent = bill["Independent Only"];
@@ -167,13 +198,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
             </p>
             ${supportIfExists(support)}
             <div class="bill-section-spacer"></div>
-            <div class="bill-label">Analysis</div>
-            <p>
-            ${analysis}
-            </p>
+            ${analysisIfExists(analysis)}
             ${notesIfExists(notes)}
             ${cosponsorsTemplate(cosponsorsD, cosponsorsR, cosponsorsI)}
-
+            ${committeesIfExists(committees)}
+            ${agenciesIfExists(agencies)}
           </div>
         </div>
         <div class="bill-sidebar">
@@ -198,8 +227,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
     const progress5 = bill["Passed"];
     const resolution = bill["Resolution"];
     const number = bill["Number"];
-
-    // console.log("resolution out: ", resolution);
 
     if (resolution) {
       console.log("resolution in: ", resolution);
@@ -226,11 +253,47 @@ window.addEventListener("DOMContentLoaded", (event) => {
     </ul>`;
   };
 
+  const getBillByNumber = (num) => {
+    for (let i = 0, len = allBillsArray.length; i < len; i++) {
+      // console.log("looking for bill num: ", num);
+      // console.log("i: ", i);
+      if (allBillsArray[i]["Number"] == num) {
+        // console.log("we found something i: ", i);
+        return allBillsArray[i];
+      }
+    }
+    return { link: "#" };
+  };
+
+  const processCompanionLinks = () => {
+    //called after full load of bills is complete
+    //triggers a redraw of all companion bills on the page to be links
+    const comps = document.querySelectorAll(".companion-section");
+    console.log(`found ${comps.length} companioin sections`);
+    comps.forEach((companion) => {
+      const billNumber = companion.dataset.number;
+      const companionLink = getBillByNumber(billNumber)["Link"];
+      companion.innerHTML = `<a href=${companionLink} target="_blank"  class="companion-bill">Companion Bill: ${billNumberToFullText(
+        billNumber
+      )}</a>`;
+    });
+    //
+  };
+
   const companionBillTemplate = (bill) => {
-    const companion = bill["Companion Bill"].trim();
+    const companionNum = bill["Companion Bill"].trim();
     const bicameral = bill["Bicameral"];
-    if (bicameral && companion != "") {
-      return `<span class="companion-bill">Companion Bill is ${companion}</span>`;
+    if (bicameral && companionNum != "") {
+      if (allBillsLoaded) {
+        const companionLink = getBillByNumber(companionNum)["Link"];
+        return `<span class="companion-section" data-number="${companionNum}"><a href=${companionLink} target="_blank" class="companion-bill">Companion Bill: ${billNumberToFullText(
+          companionNum
+        )}</a></span>`;
+      } else {
+        return `<span class="companion-section" data-number="${companionNum}"><span class="companion-bill">Companion Bill: ${billNumberToFullText(
+          companionNum
+        )}</span></span>`;
+      }
     }
     return "";
   };
@@ -269,47 +332,33 @@ window.addEventListener("DOMContentLoaded", (event) => {
       `;
     }
     return "";
-
-    // <div class="cosponsors">
-    //           <div class="cosponsors-democrat">
-    //             <span class="cosponsors-d-title">Democratic Cosponsors:</span>
-    //             ${cosponsorsD}
-    //           </div>
-    //           <div class="cosponsors-republican">
-    //             <span class="cosponsors-r-title">Republican Cosponsors:</span>
-    //             ${cosponsorsR}
-    //           </div>
-    //           <div class="cosponsors-independent">
-    //             <span class="cosponsors-i-title">Independent Cosponsors:</span>
-    //             ${cosponsorsI}
-    //           </div>
-    //         </div>
   };
 
   const listFilters = (bill) => {
-    const belowTheFoldTags = [
-      "Soil Health",
-      "Livestock/Grazing",
-      "Local/Regional Food Systems",
-      "Ag Infrastructure",
-      "Forestry",
-      "Wildfire",
-      "Row Crops",
-      "Finance",
-      "Taxes",
-      "Incentives",
-      "Regional Infrastructure",
-      "Research",
-      "Crop Insurance",
-      "Marker Bill",
-      "Regulation",
-      "Removing Barriers",
-      "Omnibus Package",
-      "Resolution",
-      "Core",
-      "Secondary",
-    ];
-    let tagsHTML = belowTheFoldTags
+    // const belowTheFoldTags = [
+    //   "Soil Health",
+    //   "Livestock/Grazing",
+    //   "Local/Regional Food Systems",
+    //   "Ag Infrastructure",
+    //   "Forestry",
+    //   "Wildfire",
+    //   "Row Crops",
+    //   "Finance",
+    //   "Taxes",
+    //   "Incentives",
+    //   "Regional Infrastructure",
+    //   "Research",
+    //   "Crop Insurance",
+    //   "Marker Bill",
+    //   "Regulation",
+    //   "Removing Barriers",
+    //   "Omnibus Package",
+    //   "Resolution",
+    //   "Core",
+    //   "Secondary",
+    // ];
+
+    let tagsHTML = issueAreaTags
       .map((tag) => {
         let tagValue = bill[tag];
         if (tagValue) return `<li>${tag}</li>`;
@@ -327,6 +376,55 @@ window.addEventListener("DOMContentLoaded", (event) => {
       `;
   };
 
+  const committeesIfExists = (committees) => {
+    // console.log("support:", support);
+    // console.log("support length:", support.length);
+    if (!committees.trim()) return "";
+
+    // Agriculture - Subcommittee on Nutrition, Oversight, and Department Operations; Rules
+    htmlString = '<div class="committee-section">';
+    htmlString += '<div class="tiny-label">COMMITTEES</div>';
+    const comms = committees.split(";");
+    comms.forEach((com) => {
+      commSections = com.split("-");
+      if (commSections.length > 1) {
+        // in here means there are subsections
+        htmlString += `<div class="committee">${commSections[0].trim()}</div>`;
+        const subs = commSections[1].split("&");
+        subs.forEach((sub) => {
+          htmlString += `<div class="subcommittee">${sub.trim()}</div>`;
+        });
+      } else {
+        htmlString += `<div class="committee">${com.trim()}</div>`;
+      }
+    });
+    htmlString += "</div>";
+    return htmlString;
+
+    // return `
+    //   <div class="committee-section">
+    //     <div class="tiny-label">COMMITTEES</div>
+    //     <hr />
+    //     <div class="committee">Health and Human Flourishing</div>
+    //     <div class="subcommittee">Ordinary greatness</div>
+    //     <div class="subcommittee">Homemaking arts for all the married ladies</div>
+    //     <div class="committee">Health and Human Flourishing</div>
+    //     </div>
+    //     `;
+  };
+
+  const agenciesIfExists = (agencies) => {
+    // console.log("support:", support);
+    // console.log("support length:", support.length);
+    if (!agencies.trim()) return "";
+    return `
+    <div class="committee-section">
+    <div class="tiny-label">AGENCIES</div>
+    <div class="agency">${agencies}</div>
+    </div>
+  `;
+  };
+
   const supportIfExists = (support) => {
     // console.log("support:", support);
     // console.log("support length:", support.length);
@@ -336,6 +434,18 @@ window.addEventListener("DOMContentLoaded", (event) => {
       <div class="bill-label">Support</div>
       <p>
       ${linksToHTML(stringToList(support))}
+      </p>
+    `;
+  };
+
+  const analysisIfExists = (analysis) => {
+    // console.log("support:", support);
+    // console.log("support length:", support.length);
+    if (!analysis.trim()) return "";
+    return `
+      <div class="bill-label">Analysis</div>
+      <p>
+      ${analysis}
       </p>
     `;
   };
@@ -500,21 +610,51 @@ window.addEventListener("DOMContentLoaded", (event) => {
   const addShowHideClickEvents = () => {
     const tracker = document.querySelector("#tracker");
     const legislators = document.querySelector("#legislators");
-    const openLegislators = document.querySelector("#openLegislators");
-    const openBillTracker = document.querySelector("#openBillTracker");
+    // const openLegislators = document.querySelector("#openLegislators");
+    // const openBillTracker = document.querySelector("#openBillTracker");
 
-    openBillTracker.addEventListener("click", (e) => {
-      openBillTracker.classList.add("active");
-      openLegislators.classList.remove("active");
-      tracker.style.display = "flex";
-      legislators.style.display = "none";
+    const toggleBillsLegislators = document.querySelector(".switch-button");
+    // const toggleAnimated = document.querySelector(".switch-button-label");
+
+    // displayBillsSection
+    //.switch-button-label:before
+
+    // toggleAnimated.addEventListener("animationend", (e) => {
+    //   if (displayBillsSection) {
+    //     tracker.style.display = "none";
+    //     legislators.style.display = "flex";
+    //   } else {
+    //     tracker.style.display = "flex";
+    //     legislators.style.display = "none";
+    //   }
+    //   displayBillsSection = !displayBillsSection;
+    // });
+
+    toggleBillsLegislators.addEventListener("click", (e) => {
+      setTimeout(() => {
+        if (displayBillsSection) {
+          tracker.style.display = "none";
+          legislators.style.display = "flex";
+        } else {
+          tracker.style.display = "flex";
+          legislators.style.display = "none";
+        }
+        displayBillsSection = !displayBillsSection;
+      }, 200);
     });
-    openLegislators.addEventListener("click", () => {
-      openBillTracker.classList.remove("active");
-      openLegislators.classList.add("active");
-      tracker.style.display = "none";
-      legislators.style.display = "flex";
-    });
+
+    // openBillTracker.addEventListener("click", (e) => {
+    //   openBillTracker.classList.add("active");
+    //   openLegislators.classList.remove("active");
+    //   tracker.style.display = "flex";
+    //   legislators.style.display = "none";
+    // });
+    // openLegislators.addEventListener("click", () => {
+    //   openBillTracker.classList.remove("active");
+    //   openLegislators.classList.add("active");
+    //   tracker.style.display = "none";
+    //   legislators.style.display = "flex";
+    // });
 
     // function openCity(evt, cityName) {
     //   // Declare all variables
@@ -620,24 +760,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     },
     {
       title: "ISSUE AREAS",
-      tags: [
-        "Soil Health",
-        "Livestock/Grazing",
-        "Local/Regional Food Systems",
-        "Ag Infrastructure",
-        "Forestry",
-        "Wildfire",
-        "Row Crops",
-        "Finance",
-        "Taxes",
-        "Incentives",
-        "Regional Infrastructure",
-        "Research",
-        "Crop Insurance",
-        "Marker Bill",
-        "Regulation",
-        "Removing Barriers",
-      ],
+      tags: issueAreaTags,
     },
   ];
 

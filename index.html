@@ -34,6 +34,7 @@
 
 <body>
   <main>
+    <div id="beta">Beta</div>
     <div id="intro">
       <h1>Federal Soil Health<br />Bill Tracker</h1>
       <p>Highlighting bills introduced into U.S. Congress that could have a significant impact on soil health and
@@ -42,8 +43,14 @@
     </div>
 
     <div id="tabs">
-      <button id="openBillTracker" class="active">Bills</button>
-      <button id="openLegislators">Legislators</button>
+      <!-- <button id="openBillTracker" class="active">Bills</button>
+      <button id="openLegislators">Legislators</button> -->
+      <div class="switch-button">
+        <input class="switch-button-checkbox" type="checkbox"></input>
+        <label class="switch-button-label" for="">
+          <span class="switch-button-label-span">Bills</span>
+        </label>
+      </div>
     </div>
 
     <div id="tracker" class="tab-section">
@@ -96,7 +103,8 @@
     </div>
 
     <div id="legislators" class="tab-section">
-      <div id="filters">
+      <div class="soon">Legislators coming soon</div>
+      <!-- <div id="filters">
         <div class="filter-section">
           <div class="filter-section-title">PARTY</div>
 
@@ -152,7 +160,7 @@
         Committee in deciding the legislation to be considered. The Senate does not have a position
         similar to Speaker. In the Senate, the majority and minority leaders generally work together in
         consultation with all members to determine the schedule.
-      </div>
+      </div> -->
     </div>
   </main>
 </body>

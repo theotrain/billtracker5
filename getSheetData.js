@@ -1,6 +1,6 @@
 const getSheetData = ({ sheetName, query, callback }) => {
   console.log(sheetName, query);
-  const sheetID = "1zU2Cm2-x1jkVepVojH42u0y6RKCvEUDcfeBhEeyrKhg";
+  const sheetID = "1fgCgR9u4ntm8x2-oTg4xZUmw_A2RixSsvqd_OV_y-Ok";
   const base = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?`;
   // const sheetName1 = "bills";
   // const sheetName2 = "legislators";
@@ -21,7 +21,7 @@ const getSheetData = ({ sheetName, query, callback }) => {
     .then((response) => {
       // const jsData = JSON.parse(response.substr(47).slice(0, -2));
       // console.log(jsData);
-      console.log(responseToObjects(response));
+      // console.log(responseToObjects(response));
       callback(responseToObjects(response));
       // console.log(bills);
     });
