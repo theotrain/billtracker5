@@ -5,6 +5,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
   let showingBills = 0;
   let allBillsLoaded = false;
   let displayBillsSection = true;
+  let toggleBillsIsClickable = true;
 
   const issueAreaTags = [
     "Soil Health",
@@ -613,34 +614,31 @@ window.addEventListener("DOMContentLoaded", (event) => {
     // const openLegislators = document.querySelector("#openLegislators");
     // const openBillTracker = document.querySelector("#openBillTracker");
 
-    const toggleBillsLegislators = document.querySelector(".switch-button");
-    // const toggleAnimated = document.querySelector(".switch-button-label");
-
-    // displayBillsSection
-    //.switch-button-label:before
-
-    // toggleAnimated.addEventListener("animationend", (e) => {
-    //   if (displayBillsSection) {
-    //     tracker.style.display = "none";
-    //     legislators.style.display = "flex";
-    //   } else {
-    //     tracker.style.display = "flex";
-    //     legislators.style.display = "none";
-    //   }
-    //   displayBillsSection = !displayBillsSection;
-    // });
+    const toggleBillsLegislators = document.querySelector(
+      ".switch-button-checkbox"
+    );
 
     toggleBillsLegislators.addEventListener("click", (e) => {
-      setTimeout(() => {
-        if (displayBillsSection) {
-          tracker.style.display = "none";
-          legislators.style.display = "flex";
-        } else {
-          tracker.style.display = "flex";
-          legislators.style.display = "none";
-        }
-        displayBillsSection = !displayBillsSection;
-      }, 200);
+      e.stopPropagation();
+      if (toggleBillsIsClickable) {
+        toggleBillsIsClickable = false;
+
+        setTimeout(() => {
+          if (displayBillsSection) {
+            tracker.style.display = "none";
+            legislators.style.display = "flex";
+          } else {
+            tracker.style.display = "flex";
+            legislators.style.display = "none";
+          }
+          displayBillsSection = !displayBillsSection;
+          console.log("display bills: ", displayBillsSection);
+        }, 200);
+
+        setTimeout(() => {
+          toggleBillsIsClickable = true;
+        }, 200);
+      }
     });
 
     // openBillTracker.addEventListener("click", (e) => {
